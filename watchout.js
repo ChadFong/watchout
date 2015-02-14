@@ -38,7 +38,7 @@ for (var i = 0; i < difficulty; i++) {
   enemies.push(0);
 }
 
-var width = 800, height = 400, radius = 10;
+var width = 800, height = 400, radius = 10, numCollisions = 0, highScore = 0, currentScore = 0;
 
 var gameWindow = d3.select("body").append("svg")
     .attr("width", width)
@@ -47,18 +47,23 @@ var gameWindow = d3.select("body").append("svg")
 
 // collision
 var collision = function() {
+  var result = false;
   d3.selectAll("svg").selectAll("circle.enemies").each( function(){
-    // console.log( "-----------------------------------------");
-    console.log( "X: " +d3.select(this).attr("cx") );
-    console.log( "Y: " +d3.select(this).attr("cy") );
-    console.log( "R: " +d3.select(this).attr("r") );
-    console.log( "-----------------------------------------");
+    var player = d3.select("circle.player");
+    var playCoords = [player.data()[0].x,player.data()[0].y];
+    var enemyCoords = [d3.select(this).attr("cx"), d3.select(this).attr("cy")];
+
+    var dist = Math.sqrt(Math.pow(playCoords[0] - enemyCoords[0], 2) + Math.pow(playCoords[1] - enemyCoords[1], 2));
+
+    if(dist < 25){
+      d3.select(".collisions").selectAll("span").text(numCollisions++);
+      d3.select(".high").selectAll("span").text(highScore = highScore < currentScore ? currentScore : highScore);
+      currentScore = 0;
+      result = true;
+      return;
+    }
   });
- // = function circlesIntersect(c1X,c1Y,c1Radius, c2X, c2Y, c2Radius){
-    // var distanceX = c2X - c1X;
-    // var distanceY = c2Y - c1Y;
-    // var magnitudeSquared = distanceX * distanceX + distanceY * distanceY;
-    // return magnitudeSquared < (c1Radius + c2Radius) * (c1Radius + c2Radius);
+  return result;
 };
 
 
@@ -112,5 +117,8 @@ setInterval(function() {
 
 setInterval(function() {
   // console.log("shuffling!");
-  collision();
-}, 100);
+  var hit = collision();
+  if(!hit){
+    d3.select(".current").selectAll("span").text(currentScore++);
+  }
+}, 50);
