@@ -1,36 +1,3 @@
-//   .append("circle")
-//     .attr("cx", 10)
-//     .attr("cy", 10)
-//     .attr("r", 10);
-
-// var update = function (data) {
-//   // Select all circle and give data
-//   var circle = gameWindow.selectAll("circle")
-//     .data(data); //, function(d) { return d; } to pass in a key
-
-//   circle.enter().append("circle")
-//       .attr("cx", 60)
-//       .attr("cy", 60)
-//       .attr("r", 100);
-// };
-
-// update([1,2,3]);
-
-// var circlesWithData = function(data){
-//   return d3.select('body').select('svg').selectAll('circle').data(data, function(d){ return d });
-// };
-
-// var update = function(circles){circles.attr('class', 'update')}
-
-// var append = function(circles){
-//   circles.enter().append('circle').attr('class','enter').attr('cy', 50).attr('r', 10).attr('cx',function(d){return d})
-// };
-
-// var remove = function(circles){
-//   circles.exit().attr('class', 'exit').transition().duration(750).remove();
-// };
-//
-
 var difficulty = 20;
 
 var enemies = [];
@@ -85,38 +52,27 @@ var player = d3.select("svg").selectAll("circle").data([{name: player, x: width/
     .attr("class", "player")
     .call(drag);
 
-// update function
-var update = function(data) {
-  var enemies = d3.select("svg").selectAll("circle.enemies")
-      .data(data);
 
-  // update/move them to new locations
-  // console.log("Updating Circles!");
-  enemies.transition().duration(2000)
-      .attr("cx",  function(){return Math.floor(Math.random()*(width-10))})
-      .attr("cy",  function(){return Math.floor(Math.random()*(height-10))});
+// create new enemies
+var enemies = d3.select('svg').selectAll('circle.enemies').data(d3.range(15))
+                .enter().append('circle')
+                .attr('class','enemies')
+                .attr("cx",  function(){return Math.floor(Math.random()*(width-10))})
+                .attr("cy",  function(){return Math.floor(Math.random()*(height-10))})
+                .attr("r", radius);
 
-  // create new elements if needed
-  // console.log("Building Circles!");
-  enemies.enter().append("circle")
-      .attr("class", "enemies")
-      .attr("cx",  function(){return Math.floor(Math.random()*(width-10))})
-      .attr("cy",  function(){return Math.floor(Math.random()*(height-10))})
-      .attr("r", radius);
-
-  // remove elements if needed/when difficulty lowered
+// moves enemies
+var move = function(element){
+    element.transition().duration(2000)
+           .attr("cx",  function(){return Math.floor(Math.random()*(width-10))})
+           .attr("cy",  function(){return Math.floor(Math.random()*(height-10))})
+           .each('end', function(){ move (d3.select(this))})
 };
 
-update(enemies);
-update(enemies);
+
+move(enemies);
 
 setInterval(function() {
-  // console.log("shuffling!");
-  update(enemies);
-}, 1500);
-
-setInterval(function() {
-  // console.log("shuffling!");
   var hit = collision();
   if(!hit){
     d3.select(".current").selectAll("span").text(currentScore++);
